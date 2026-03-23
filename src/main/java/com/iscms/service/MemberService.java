@@ -34,6 +34,14 @@ public class MemberService {
 
     // ── REGISTRATION REQUEST (3 day approval) ────────────────────
     public void createRegistrationRequest(Member member, String tier, String packageType) {
+
+        if (member.getDateOfBirth() == null) {
+            throw new IllegalArgumentException("Date of birth is required.");
+        }
+        if (member.getPhone() == null || member.getPhone().isBlank()) {
+            throw new IllegalArgumentException("Phone number is required.");
+        }
+
         if (member.getDateOfBirth().isAfter(LocalDate.now().minusYears(18))) {
             throw new IllegalArgumentException("Minimum age is 18.");
         }
@@ -69,6 +77,13 @@ public class MemberService {
 
     // ── REGISTER MEMBER DIRECT (Manager adds directly) ───────────
     public void registerMember(Member member, String tier, String packageType, int managerId) {
+        if (member.getDateOfBirth() == null) {
+            throw new IllegalArgumentException("Date of birth is required.");
+        }
+        if (member.getPhone() == null || member.getPhone().isBlank()) {
+            throw new IllegalArgumentException("Phone number is required.");
+        }
+
         if (member.getDateOfBirth().isAfter(LocalDate.now().minusYears(18))) {
             throw new IllegalArgumentException("Minimum age is 18.");
         }
@@ -88,6 +103,8 @@ public class MemberService {
         if (!member.getPassword().startsWith("$2a$")) {
             member.setPassword(AuthService.hashPassword(member.getPassword()));
         }
+        // Not: production'da bu blok tek bir DB transaction içinde olmalıdır.
+// JDBC transaction: conn.setAutoCommit(false) → işlemler → conn.commit() / conn.rollback()
         member.setStatus("ACTIVE");
         memberDAO.insert(member);
 
