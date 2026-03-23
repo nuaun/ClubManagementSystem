@@ -1,0 +1,3 @@
+db.url=jdbc:mysql://localhost:3306/isc_ms?useSSL=false&serverTimezone=Europe/Istanbul
+db.user=root
+db.password=Azra140219!
