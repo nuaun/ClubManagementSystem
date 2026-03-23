@@ -99,6 +99,12 @@ public class PTService {
     }
 
     public void markCompleted(int appointmentId) {
+        PersonalTrainingAppointment apt = appointmentDAO.findById(appointmentId).orElseThrow();
+        LocalDateTime appointmentEnd = apt.getAppointmentDate().atTime(apt.getEndTime());
+        if (LocalDateTime.now().isBefore(appointmentEnd)) {
+            throw new IllegalStateException(
+                    "Cannot mark as completed before the appointment time has passed.");
+        }
         appointmentDAO.updateStatus(appointmentId, "COMPLETED");
     }
 
