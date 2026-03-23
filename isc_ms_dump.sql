@@ -21,7 +21,7 @@ SET @@SESSION.SQL_LOG_BIN= 0;
 -- GTID state at the beginning of the backup 
 --
 
-SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ '4e9d1aa2-a46b-11f0-92a1-e3a0787afb7b:1-283';
+SET @@GLOBAL.GTID_PURGED=/*!80000 '+'*/ '4e9d1aa2-a46b-11f0-92a1-e3a0787afb7b:1-284';
 
 --
 -- Table structure for table `event`
@@ -151,7 +151,7 @@ CREATE TABLE `member` (
   `bmi_updated_at` timestamp NULL DEFAULT NULL,
   `emergency_contact_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `emergency_contact_phone` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
-  `status` enum('ACTIVE','PASSIVE','SUSPENDED','ARCHIVED','PENDING','REGISTRATION_FAILED') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'PASSIVE',
+  `status` enum('ACTIVE','PASSIVE','SUSPENDED','ARCHIVED','PENDING','REGISTRATION_FAILED','FROZEN') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'PASSIVE',
   `failed_attempts` tinyint NOT NULL DEFAULT '0',
   `is_locked` tinyint(1) NOT NULL DEFAULT '0',
   `archived_at` timestamp NULL DEFAULT NULL,
@@ -506,4 +506,4 @@ SET @@SESSION.SQL_LOG_BIN = @MYSQLDUMP_TEMP_LOG_BIN;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-03-23 13:12:30
+-- Dump completed on 2026-03-23 13:23:02
