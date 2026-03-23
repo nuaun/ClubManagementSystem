@@ -4,6 +4,7 @@ import com.iscms.model.Event;
 import com.iscms.model.Manager;
 import com.iscms.service.EventFactory;
 import com.iscms.service.EventService;
+import com.iscms.service.MemberService;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -15,7 +16,8 @@ import java.util.List;
 public class EventManagementPanel extends JPanel {
 
     private final Manager manager;
-    private final EventService eventService = new EventService();
+    private final EventService eventService   = new EventService();
+    private final MemberService memberService = new MemberService();
 
     private JTable eventTable;
     private DefaultTableModel tableModel;
@@ -93,17 +95,17 @@ public class EventManagementPanel extends JPanel {
         c.insets = new Insets(5, 5, 5, 5);
         c.fill   = GridBagConstraints.HORIZONTAL;
 
-        JTextField txtName     = new JTextField(20);
+        JTextField txtName      = new JTextField(20);
         JComboBox<String> cbCat = new JComboBox<>(new String[]{
                 "FITNESS", "YOGA", "SWIMMING", "HIIT", "WORKSHOP", "VIP_ONLY", "OTHER"});
-        JTextField txtDate     = new JTextField("YYYY-MM-DD");
-        JTextField txtStart    = new JTextField("HH:MM");
-        JTextField txtEnd      = new JTextField("HH:MM");
-        JTextField txtLocation = new JTextField(20);
-        JTextField txtCapacity = new JTextField("50");
-        JTextField txtFee      = new JTextField("0");
+        JTextField txtDate      = new JTextField("YYYY-MM-DD");
+        JTextField txtStart     = new JTextField("HH:MM");
+        JTextField txtEnd       = new JTextField("HH:MM");
+        JTextField txtLocation  = new JTextField(20);
+        JTextField txtCapacity  = new JTextField("50");
+        JTextField txtFee       = new JTextField("0");
         JComboBox<String> cbTier = new JComboBox<>(new String[]{"CLASSIC", "GOLD", "VIP"});
-        JTextArea  txtDesc     = new JTextArea(3, 20);
+        JTextArea  txtDesc      = new JTextArea(3, 20);
 
         String[] labels = {"Event Name *", "Category *", "Date * (YYYY-MM-DD)",
                 "Start Time * (HH:MM)", "End Time * (HH:MM)", "Location",
@@ -131,13 +133,12 @@ public class EventManagementPanel extends JPanel {
 
         btnSave.addActionListener(e -> {
             try {
-                double fee = Double.parseDouble(txtFee.getText().trim());
-                String minTier = (String) cbTier.getSelectedItem();
-                LocalDate date = LocalDate.parse(txtDate.getText().trim());
+                double fee      = Double.parseDouble(txtFee.getText().trim());
+                String minTier  = (String) cbTier.getSelectedItem();
+                LocalDate date  = LocalDate.parse(txtDate.getText().trim());
                 LocalTime start = LocalTime.parse(txtStart.getText().trim());
                 LocalTime end   = LocalTime.parse(txtEnd.getText().trim());
 
-                // EventFactory pattern
                 Event event;
                 if (fee == 0) {
                     event = EventFactory.createFreeEvent(
@@ -179,10 +180,10 @@ public class EventManagementPanel extends JPanel {
             JOptionPane.showMessageDialog(this, "Please select an event first.");
             return;
         }
-        int eventId = (int) tableModel.getValueAt(row, 0);
-        String name = (String) tableModel.getValueAt(row, 1);
+        int eventId    = (int) tableModel.getValueAt(row, 0);
+        String name    = (String) tableModel.getValueAt(row, 1);
         int confirm = JOptionPane.showConfirmDialog(this,
-                "Cancel event '" + name + "'? All registrations will be deleted.",
+                "Cancel event '" + name + "'? All registrations will be cancelled.",
                 "Confirm", JOptionPane.YES_NO_OPTION);
         if (confirm == JOptionPane.YES_OPTION) {
             eventService.cancelEvent(eventId);
@@ -201,14 +202,18 @@ public class EventManagementPanel extends JPanel {
 
         var regs = eventService.getRegistrationsByEvent(eventId);
 
-        String[] cols = {"Registration ID", "Member ID", "Date", "Payment", "Waitlist"};
+        String[] cols = {"Reg ID", "Member Name", "Date", "Payment", "Waitlist"};
         DefaultTableModel model = new DefaultTableModel(cols, 0);
         for (var r : regs) {
+            String memberName = memberService.getMemberById(r.getMemberId())
+                    .map(m -> m.getFullName())
+                    .orElse("ID:" + r.getMemberId());
             model.addRow(new Object[]{
-                    r.getRegistrationId(), r.getMemberId(),
+                    r.getRegistrationId(),
+                    memberName,
                     r.getRegistrationDate() != null ? r.getRegistrationDate().toLocalDate() : "-",
                     r.getPaymentStatus(),
-                    r.getWaitlistPosition() != null ? "#" + r.getWaitlistPosition() : "Registered"
+                    r.getWaitlistPosition() != null ? "Waitlist #" + r.getWaitlistPosition() : "Registered"
             });
         }
 
