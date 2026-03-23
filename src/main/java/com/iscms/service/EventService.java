@@ -63,9 +63,31 @@ public class EventService {
             throw new IllegalStateException("This event requires at least " + event.getMinTier() + " tier.");
         }
 
+        // duplicate check
         if (registrationDAO.existsByMemberAndEvent(memberId, eventId)) {
             throw new IllegalStateException("You are already registered for this event.");
         }
+
+// Aynı tarih ve çakışan saatte başka etkinlik kontrolü
+        List<EventRegistration> myRegs = registrationDAO.findByMemberId(memberId);
+        for (EventRegistration reg : myRegs) {
+            if ("CANCELLED".equals(reg.getPaymentStatus())) continue;
+            Optional<Event> existingOpt = eventDAO.findById(reg.getEventId());
+            if (existingOpt.isEmpty()) continue;
+            Event existing = existingOpt.get();
+            if (!existing.getEventDate().equals(event.getEventDate())) continue;
+            if ("CANCELLED".equals(existing.getStatus())) continue;
+            boolean overlap = existing.getStartTime().isBefore(event.getEndTime())
+                    && existing.getEndTime().isAfter(event.getStartTime());
+            if (overlap) {
+                throw new IllegalStateException(
+                        "You already have a registration that overlaps with this event: "
+                                + existing.getEventName() + " (" + existing.getStartTime()
+                                + " - " + existing.getEndTime() + ")");
+            }
+        }
+
+
 
         if ("CLASSIC".equals(memberTier)) {
             LocalDateTime earliest = event.getCreatedAt().plusHours(event.getEarlyAccessHours());
